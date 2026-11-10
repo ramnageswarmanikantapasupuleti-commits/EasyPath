@@ -1,0 +1,985 @@
+# EasyPath — Product Requirements Document (PRD)
+
+***
+
+## 1\. Overview
+
+**App Name:** EasyPath
+**Build Type:** Progressive Web App (PWA)
+
+EasyPath is an accessibility-first Progressive Web App designed to empower individuals with cognitive disabilities, learning differences, acquired brain injuries, dementia, autism, or intellectual disabilities to navigate daily life with greater independence and confidence. The application provides an ultra-simplified, deeply personalized interface that breaks down complex tasks into manageable visual steps, delivers intelligent reminders, and leverages AI to translate difficult language and real-world objects into plain, understandable information. EasyPath operates across devices via a PWA architecture, ensuring offline functionality for core features and eliminating installation barriers.
+
+The primary target audience includes adults and young adults with cognitive impairments, alongside a secondary audience of caregivers, family members, teachers, and therapists who support them. EasyPath solves the critical problem of digital exclusion — where mainstream apps overwhelm users with complex interfaces, dense text, and unpredictable interactions — by providing a calm, forgiving, voice-enabled, and visually guided experience that adapts to each user's abilities. A dedicated caregiver dashboard enables trusted supporters to configure routines, monitor progress, and receive alerts without intruding on the user's autonomy.
+
+***
+
+## 2\. Essential Core Features
+
+### 2.1 Simplified Interface System
+
+* One task or piece of information displayed per screen at a time
+* Large, clearly labeled buttons with icons and optional text labels
+* Consistent layout and predictable navigation across all screens
+* No hidden menus, dropdowns, or nested navigation layers
+* Forgiving error handling with easy undo, no penalty messages, and calm prompts
+
+### 2.2 Task Breakdown Engine
+
+* Users or caregivers input a goal (e.g., "make tea," "fill out this form")
+* AI (GPT-4o) decomposes the goal into numbered visual micro-steps
+* Each step displayed one at a time with an icon, photo, and brief plain-language instruction
+* Linear progress indicator showing current step vs. total steps
+* "Back" and "Repeat" buttons on every step screen
+* Steps can include photos uploaded by caregivers for personalization
+
+### 2.3 Smart Reminder System
+
+* Reminders for medications, meals, appointments, and daily routines
+* Gentle audio chime and vibration notification
+* Persistent soft re-prompts if a reminder is not acknowledged (configurable intervals)
+* Missed-task escalation: alerts sent to a designated caregiver after a configurable number of missed acknowledgments
+* Offline-capable reminder delivery using service workers
+
+### 2.4 Visual Daily Schedule
+
+* Timeline view with time slots, large icons, and optional photos instead of text
+* Color-coded activity categories (meals, medicine, leisure, appointments)
+* "What's next?" one-tap view showing the immediate upcoming task
+* Caregiver-editable schedule synced in real time via Supabase
+
+### 2.5 Text-to-Speech (TTS) and Speech-to-Text (STT)
+
+* TTS: any on-screen text readable aloud with one tap of a persistent speaker button
+* STT: microphone input for search, note entry, task creation, and navigation commands
+* Adjustable speech rate and voice type in settings
+* Voice-first mode: complete app navigation using only spoken commands
+
+### 2.6 AI Text Simplifier
+
+* Paste or type any complex text, or upload a photo of a document
+* GPT-4o rewrites content in plain language (reading level adjustable: simple, very simple)
+* Output read aloud automatically via TTS
+* Saved simplified texts accessible in a personal library
+
+### 2.7 Photo-Based Memory Aid
+
+* "Who is this?" — user photographs a person; app retrieves saved name, relationship, and a note
+* "What is this?" — user photographs an object; app identifies it and provides a plain-language description
+* Caregiver or user can add/edit contacts with photo, name, relationship, and voice note
+* Object library for everyday items (keys, medicine bottles, etc.)
+
+### 2.8 AI "Explain This to Me" Button
+
+* Persistent camera-access button on the home screen
+* User points camera at a bill, sign, medicine label, or menu
+* GPT-4o Vision analyzes the image and returns a plain-language spoken explanation
+* Explanation displayed as large text and read aloud simultaneously
+
+### 2.9 Safe Navigation (Landmark-Based Directions)
+
+* User inputs a destination using voice or search
+* Directions provided as step-by-step landmark descriptions ("Turn left at the blue shop")
+* No complex map rendering; each step shown one at a time with a landmark photo where available
+* One-tap "I'm Lost" button that sends the user's live GPS location to a trusted caregiver via Supabase real-time
+* Arrival confirmation prompt
+
+### 2.10 Emotion and Stress Check-Ins
+
+* Scheduled or on-demand emoji-based mood logging (5-point scale with faces)
+* Brief optional voice note attachment to mood entry
+* If stress/negative mood detected, app suggests a calming activity from a personalized list
+* Mood history visible to user and (with consent) to caregiver
+
+### 2.11 Life-Skills Coach
+
+* Guided simulations for real-world scenarios: using public transport, shopping, handling money, making a phone call
+* Safe, gamified practice environment with no real consequences
+* Step-by-step coaching with voice guidance and visual cues
+* Completion rewards tied to the gamification system
+
+### 2.12 Adaptive Interface Engine
+
+* Detects repeated errors (3+ on same step) or long inactivity pauses (configurable threshold)
+* Automatically simplifies the current screen (removes secondary elements, increases font size)
+* Offers contextual help prompt: "Do you need help?" with options to retry, call a caregiver, or skip
+* Adaptation events logged and visible in caregiver dashboard
+
+### 2.13 Gamification System
+
+* Points earned for completing tasks, check-ins, and life-skills modules
+* Daily and weekly streaks with visual streak counters
+* Reward badges displayed on a trophy shelf
+* Celebratory animations that are non-flashing and calm (gentle confetti, friendly character)
+* Progress never reset punitively; streaks "pause" rather than break
+
+### 2.14 Personalization Settings
+
+* Adjustable font size (small, medium, large, extra-large)
+* High-contrast and color-blind-friendly themes
+* Adjustable information density (minimal, standard)
+* Speech speed control
+* Language selection
+* Caregiver PIN-lock for settings to prevent accidental changes
+
+### 2.15 Caregiver Dashboard
+
+* Separate login role with elevated permissions
+* Create, edit, and delete tasks, reminders, and daily schedules for the linked user
+* View task completion history, mood logs, adaptation events, and gamification progress
+* Receive push notifications for missed reminders and "I'm Lost" triggers
+* Shared notes area accessible to multiple caregivers, teachers, or therapists linked to one user account
+* Manage linked user's contacts (memory aid) and life-skills modules
+
+### 2.16 Offline Functionality
+
+* Core features available offline via service worker caching: reminders, daily schedule, saved task steps, memory aid contacts
+* Background sync for mood logs and task completions when connectivity is restored
+* Clear offline indicator in the UI
+
+### 2.17 Privacy and Consent Management
+
+* Explicit consent flows for camera, microphone, and location access
+* Data minimization: only necessary data collected
+* User data deletion option in settings
+* Caregiver access requires explicit user (or guardian) consent grant
+* WCAG 2.1 AA + Cognitive Accessibility guidelines compliance throughout
+
+***
+
+## 3\. Tech Stack
+
+### 3.1 Front-End
+
+* **Framework:** React (with Vite as build tool)
+* **Styling:** Tailwind CSS with a custom design token system for accessibility themes
+* **PWA:** Vite PWA plugin (`vite-plugin-pwa`) with Workbox for service worker management, offline caching, and background sync
+* **State Management:** Zustand for lightweight global state (user profile, preferences, offline queue)
+* **Routing:** React Router v6
+* **Animations:** Framer Motion (configured to respect `prefers-reduced-motion`)
+* **Icons:** Lucide React + custom pictogram SVG set
+
+### 3.2 Back-End
+
+* **Platform:** Supabase
+    * **Authentication:** Supabase Auth with email/password and magic link; role-based access (user, caregiver, admin)
+    * **Database:** Supabase PostgreSQL — tables for users, profiles, tasks, schedules, reminders, mood logs, contacts, gamification, caregiver links, shared notes
+    * **Storage:** Supabase Storage — for user profile photos, contact photos, task step images, and simplified document images
+    * **Real-Time:** Supabase Realtime for live schedule updates, "I'm Lost" location push to caregiver, and shared notes sync
+    * **Edge Functions:** Supabase Edge Functions (Deno) for server-side AI calls, reminder escalation logic, and location alert dispatch
+
+### 3.3 AI Integration
+
+* **Model:** OpenAI GPT-4o
+    * Text simplification (text input → plain language output)
+    * Task breakdown (goal input → micro-step list)
+    * "Explain This to Me" (image + prompt → spoken plain-language explanation)
+    * Photo-based object identification (image → description)
+    * All AI calls routed through Supabase Edge Functions to protect API keys
+* **TTS:** Web Speech API (browser-native) with fallback to OpenAI TTS API for higher-quality voice
+* **STT:** Web Speech API (browser-native SpeechRecognition)
+
+### 3.4 APIs & Integrations
+
+| Service | Purpose |
+| ------- | ------- |
+| OpenAI GPT-4o API | Text simplification, task decomposition, image explanation, object ID |
+| OpenAI TTS API | High-quality fallback text-to-speech |
+| Web Speech API | Browser-native TTS and STT |
+| Geolocation API | User location for safe navigation and "I'm Lost" feature |
+| Nominatim / OpenStreetMap | Geocoding and landmark-based direction generation (open-source, privacy-safe) |
+| Supabase Push Notifications | Caregiver alerts for missed reminders and location share |
+| Web Push API | PWA push notifications via service worker |
+| Camera API (MediaDevices) | Photo memory aid and "Explain This to Me" feature |
+
+### 3.5 Technical Requirements
+
+* PWA manifest with home screen install prompt, splash screen, and app icons at all required sizes
+* Service worker implementing cache-first strategy for static assets, network-first for API data, and background sync queue for offline mutations
+* HTTPS required for all PWA, camera, microphone, and geolocation features
+* `prefers-reduced-motion` media query respected globally
+* `prefers-color-scheme` respected with manual override in settings
+* ARIA roles, live regions, and focus management implemented throughout
+* All interactive elements meet WCAG 2.1 AA minimum touch target size (44×44px minimum)
+
+***
+
+## 4\. Design Preferences
+
+### 4.1 Interface
+
+EasyPath uses a warm, calm, and uncluttered visual language — large touch targets, generous white space, and friendly rounded shapes that communicate safety and ease. Every screen feels open and unhurried, with a consistent structure that eliminates cognitive load from navigation itself.
+
+### 4.2 Color Palette
+
+| Role | Color | Hex |
+| ---- | ----- | --- |
+| Primary | Soft Sky Blue | `#4A90D9` |
+| Primary Dark (accessibility) | Deep Ocean Blue | `#2C5F8A` |
+| Secondary | Warm Sage Green | `#6BB F8A` → `#68B28A` |
+| Accent | Sunny Amber | `#F5A623` |
+| Background | Off-White Cream | `#FAF8F5` |
+| Surface | White | `#FFFFFF` |
+| Error / Alert | Soft Coral | `#E8695A` |
+| Success | Calm Green | `#4CAF7D` |
+| Text Primary | Charcoal | `#2D2D2D` |
+| Text Secondary | Medium Gray | `#6B6B6B` |
+| High Contrast Mode | Pure Black on White | `#000000` / `#FFFFFF` |
+
+### 4.3 Typography
+
+* **Headings:** `Nunito` (Google Fonts) — rounded, friendly, highly legible at large sizes
+* **Body / Labels:** `Atkinson Hyperlegible` (Google Fonts) — specifically designed for low-vision and cognitive accessibility, optimized for letter differentiation
+* **Minimum body font size:** 18px (user-adjustable up to 32px)
+* **Line height:** 1.6 minimum
+* **Letter spacing:** 0.02em on body text
+
+### 4.4 Additional Design Considerations
+
+* **One-task-per-screen principle:** no scrolling required on primary task screens
+* **Button design:** pill-shaped or large rounded rectangles, minimum 60px height, with icon + label always together
+* **Icons:** simple, universally recognizable pictograms with text labels — icons never used alone as the sole meaning carrier
+* **No time pressure UI:** no countdown timers visible to the user, no auto-advancing slides
+* **Error states:** warm, non-alarming colors (soft coral, never harsh red); friendly copy ("Oops, let's try again!" never "Error 404")
+* **Loading states:** gentle pulsing skeleton screens, never spinning loaders
+* **Transitions:** slow, smooth fade transitions (300ms); all animations honor `prefers-reduced-motion`
+* **Caregiver dashboard:** shares the same design language but uses a slightly denser information layout appropriate for a support professional context, distinguishable by a teal accent stripe
+
+***
+
+## 5\. All Screens / Pages
+
+***
+
+### 5.1 Onboarding & Auth
+
+#### Screen 1: Welcome / Splash Screen
+
+* **Route:** `/`
+* **UI Elements:**
+    * EasyPath logo (large, centered)
+    * App tagline in large friendly text: "Here to help you every day"
+    * "Get Started" large primary button
+    * "I already have an account — Log In" text link below
+    * TTS button (reads the page aloud)
+    * Language selector (globe icon, top-right)
+* **Navigation:** → Onboarding Role Select (new user) or → Login (returning user)
+* **Conditional:** If PWA detects returning authenticated session, auto-redirect to Home Dashboard
+
+#### Screen 2: Role Selection
+
+* **Route:** `/onboarding/role`
+* **UI Elements:**
+    * Heading: "Who is using EasyPath?"
+    * Two large card buttons with icons: "I am the main user" / "I am a caregiver or helper"
+    * TTS button
+    * Back arrow (top-left)
+* **Navigation:** → User Onboarding Flow or → Caregiver Onboarding Flow
+* **Conditional:** Role stored in onboarding state
+
+#### Screen 3: User Profile Setup
+
+* **Route:** `/onboarding/profile`
+* **UI Elements:**
+    * Large avatar photo picker (camera or gallery)
+    * Name input field (large, with STT mic button)
+    * Preferred name / nickname input
+    * Date of birth picker (simple scroll wheel)
+    * "Next" large button
+    * Progress dots indicator (step 1 of 3)
+    * TTS reads all labels aloud on focus
+* **Navigation:** → Accessibility Preferences Setup
+* **Conditional:** Photo upload to Supabase Storage on "Next"
+
+#### Screen 4: Accessibility Preferences Setup
+
+* **Route:** `/onboarding/accessibility`
+* **UI Elements:**
+    * Heading: "Let's make it comfortable for you"
+    * Font size selector (4 large preview tiles: A / A / A / A)
+    * Color theme selector (3 swatches: Default / High Contrast / Warm)
+    * Speech speed slider (Slow / Medium / Fast) with live preview button
+    * Information density toggle (Simple / Standard)
+    * Progress dots (step 2 of 3)
+    * "Next" button, "Back" button
+    * Live preview card showing current settings applied
+* **Navigation:** → Caregiver Link Setup
+* **Conditional:** Settings saved to Supabase `profiles` table on "Next"
+
+#### Screen 5: Caregiver Link Setup
+
+* **Route:** `/onboarding/caregiver-link`
+* **UI Elements:**
+    * Heading: "Would you like to connect a helper?"
+    * "Yes, connect a helper" and "Skip for now" large buttons
+    * If Yes: input field for caregiver email with "Send Invite" button
+    * Confirmation message: "Invite sent! They'll set up their account."
+    * Progress dots (step 3 of 3)
+    * "Done — Go to My Home" button
+    * TTS button
+* **Navigation:** → User Home Dashboard
+* **Conditional:** Invite email triggers Supabase Edge Function to send caregiver invite
+
+#### Screen 6: Login Screen
+
+* **Route:** `/login`
+* **UI Elements:**
+    * EasyPath logo
+    * "Welcome back!" heading
+    * Email input (large, with autofill support)
+    * Password input with show/hide toggle
+    * "Log In" large primary button
+    * "Forgot my password" link
+    * "Log in with a magic link" option (email magic link via Supabase)
+    * "Don't have an account? Start here" link
+    * TTS button
+* **Navigation:** → Home Dashboard (user) or → Caregiver Dashboard (caregiver role)
+* **Conditional:** Role-based redirect after Supabase Auth session established
+
+#### Screen 7: Forgot Password / Magic Link
+
+* **Route:** `/login/reset`
+* **UI Elements:**
+    * Email input
+    * "Send Reset Link" and "Send Magic Link" buttons
+    * Confirmation message after send
+    * Back to Login link
+* **Navigation:** → Login
+
+***
+
+### 5.2 User Core Screens
+
+#### Screen 8: Home Dashboard (User)
+
+* **Route:** `/home`
+* **UI Elements:**
+    * Top bar: avatar photo (tappable → Profile), greeting ("Good morning, [Name]!"), TTS button (top-right)
+    * "What's Next" card: large icon, task name, start time — tap to open task
+    * Today's mood emoji row (5 faces, quick tap)
+    * Shortcut grid (2×2 or 2×3): "My Schedule," "My Tasks," "Camera Helper," "Reminders," "Life Skills," "Memory Aid"
+    * Persistent bottom navigation bar
+    * Floating "Explain This to Me" camera button (amber accent, bottom-center)
+    * Offline indicator banner (if no connection)
+* **Navigation:** → respective shortcut screens; bottom nav to main sections
+* **Conditional:** Greeting time-aware (morning/afternoon/evening); if no tasks today, motivational card shown
+
+#### Screen 9: Daily Schedule View
+
+* **Route:** `/schedule`
+* **UI Elements:**
+    * Date header with left/right day navigation arrows
+    * Vertical timeline with time slots
+    * Each event: large icon + category color strip + name + time (no dense text)
+    * "Add Event" button (caregiver-only if PIN locked)
+    * TTS reads selected event details
+    * Empty state illustration if no events
+    * Today button to snap back to current day
+* **Navigation:** Tap event → Task Step View; "Add" → Add Event (caregiver); Back → Home
+* **Conditional:** Caregiver-added events marked with a small "helper added" tag
+
+#### Screen 10: Task List
+
+* **Route:** `/tasks`
+* **UI Elements:**
+    * Segmented tabs: "Today" / "All" / "Done"
+    * Each task card: large icon, task name, status pill (To Do / In Progress / Done), "Start" button
+    * Add Task button (mic icon for voice input + text option)
+    * Swipe-to-complete gesture with forgiving undo snackbar
+    * Empty state illustration for each tab
+    * TTS button on each card
+* **Navigation:** "Start" → Task Step View; Add → Task Creation Screen
+
+#### Screen 11: Task Creation Screen
+
+* **Route:** `/tasks/new`
+* **UI Elements:**
+    * Large text input: "What do you want to do?" with STT mic button
+    * Or: pick from common task templates (grid of large icon cards: Make Tea, Take Medicine, Go Shopping, etc.)
+    * "Break it into steps for me" AI button (calls GPT-4o task decomposition)
+    * Loading state: friendly spinner with message "Working on your steps…"
+    * Generated steps preview (scrollable list, each step editable)
+    * "Save Task" and "Start Now" buttons
+    * Back button
+* **Navigation:** → Task Step View (Start Now) or → Task List (Save)
+* **Conditional:** AI decomposition requires connectivity; if offline, manual step entry mode shown
+
+#### Screen 12: Task Step View (Step-by-Step)
+
+* **Route:** `/tasks/:taskId/step/:stepNumber`
+* **UI Elements:**
+    * Full-screen step layout
+    * Step counter: "Step 2 of 6" (progress bar beneath)
+    * Large step illustration/icon (or caregiver-uploaded photo)
+    * Step instruction in large plain-language text
+    * TTS auto-reads instruction on screen load (configurable)
+    * "Done — Next Step" large primary button
+    * "Go Back" secondary button
+    * "Hear it again" TTS repeat button
+    * "I need help" button (bottom, opens help options modal)
+    * Adaptive simplification overlay (triggered automatically if struggles detected)
+* **Navigation:** Next Step → next route; Final step → Task Complete Screen; "I need help" → Help Modal
+* **Conditional:** Adaptive engine monitors time-on-step and error taps; simplification overlay appears automatically
+
+#### Screen 13: Task Complete Screen
+
+* **Route:** `/tasks/:taskId/complete`
+* **UI Elements:**
+    * Full-screen celebration (calm non-flashing animation: gentle stars, friendly character)
+    * "You did it, [Name]!" heading
+    * Points earned badge (gamification)
+    * Streak update if applicable
+    * "Back to Home" button
+    * "Do another task" button
+    * TTS reads congratulations message
+* **Navigation:** → Home or → Task List
+
+#### Screen 14: Reminders Screen
+
+* **Route:** `/reminders`
+* **UI Elements:**
+    * List of upcoming reminders (grouped: Today / This Week)
+    * Each reminder card: icon, name, time, category color (medicine = teal, meal = orange, appointment = blue)
+    * "Done" and "Snooze" swipe actions on each card
+    * "Add Reminder" button
+    * Missed reminder cards highlighted in soft coral with caregiver alert badge if escalated
+    * TTS button on each reminder
+* **Navigation:** Add → Reminder Creation; Tap reminder → Reminder Detail
+
+#### Screen 15: Reminder Creation / Edit
+
+* **Route:** `/reminders/new` and `/reminders/:id/edit`
+* **UI Elements:**
+    * Reminder name input (STT supported)
+    * Category picker (large icon buttons: Medicine, Meal, Appointment, Routine)
+    * Date and time picker (large, scroll-wheel style)
+    * Repeat options: Never / Daily / Weekly / Custom (simple toggle grid)
+    * Caregiver alert toggle: "Notify my helper if I miss this"
+    * Save and Cancel buttons
+* **Navigation:** Save → Reminders List; Cancel → Reminders List
+
+#### Screen 16: Camera Helper / "Explain This to Me"
+
+* **Route:** `/camera-helper`
+* **UI Elements:**
+    * Full-screen camera viewfinder
+    * Large amber shutter button (center bottom): "Take Photo to Explain"
+    * Mode selector tabs at top: "Explain This" / "Who Is This?" / "What Is This?"
+    * After capture: photo preview with loading indicator ("Figuring this out for you…")
+    * Result card: large plain-language text explanation + TTS auto-play
+    * "Save to Memory" button (for contacts/objects)
+    * "Try Again" and "Share with Helper" buttons
+    * Back button (top-left)
+* **Navigation:** → Result displayed inline; "Save" → Memory Aid Contact/Object Save flow
+* **Conditional:** Requires camera permission; graceful fallback if denied (prompt to allow)
+
+#### Screen 17: Memory Aid — Contacts
+
+* **Route:** `/memory-aid/contacts`
+* **UI Elements:**
+    * Grid of large contact photo cards (name + relationship label)
+    * "Add Person" button (top-right)
+    * Search bar with STT (top)
+    * Tap contact → Contact Detail Screen
+    * Empty state: illustration + "Add the people in your life"
+* **Navigation:** Tap → Contact Detail; Add → Add Contact
+
+#### Screen 18: Contact Detail Screen
+
+* **Route:** `/memory-aid/contacts/:contactId`
+* **UI Elements:**
+    * Large circular photo
+    * Name (large heading)
+    * Relationship label (e.g., "My sister," "My doctor")
+    * Voice note player (if recorded)
+    * Notes section (plain-language text)
+    * Edit button, Delete button (with confirmation)
+    * TTS reads all details
+    * "Call [Name]" button (if phone number saved, opens tel: link)
+* **Navigation:** Back → Contacts List; Edit → Edit Contact form
+
+#### Screen 19: Memory Aid — Objects
+
+* **Route:** `/memory-aid/objects`
+* **UI Elements:**
+    * Grid of object photo cards with name labels
+    * "Add Object" button
+    * Search bar
+    * Tap → Object Detail (name, description, usage instruction in plain language)
+* **Navigation:** As per Contacts flow pattern
+
+#### Screen 20: Safe Navigation
+
+* **Route:** `/navigation`
+* **UI Elements:**
+    * "Where do you want to go?" voice input field (mic + text)
+    * Recent destinations list (large cards)
+    * "Start Journey" button
+    * During navigation: single step view ("Turn left at the blue shop"), large directional icon, step counter
+    * "Next Step" confirmation button (user confirms they completed the step)
+    * Landmark photo where available (from Nominatim/OSM)
+    * "I'm Lost" large red button (always visible, bottom)
+    * "I've Arrived" button on final step
+* **Navigation:** "I'm Lost" → triggers Supabase Realtime location push to caregiver + confirmation screen; "Arrived" → completion screen → Home
+* **Conditional:** Requires geolocation permission; offline fallback shows pre-downloaded step list
+
+#### Screen 21: "I'm Lost" Confirmation Screen
+
+* **Route:** `/navigation/lost`
+* **UI Elements:**
+    * Reassuring message: "It's okay. Your helper has been told where you are."
+    * Animated gentle icon (breathing circle)
+    * Caregiver name and avatar shown: "[Caregiver Name] is on their way / knows where you are"
+    * "Call [Caregiver Name]" button (tel: link)
+    * "I'm Okay Now — Go Back" button
+    * TTS reads message automatically
+* **Navigation:** → Navigation (I'm Okay) or stays on screen until dismissed
+
+#### Screen 22: Mood Check-In Screen
+
+* **Route:** `/mood`
+* **UI Elements:**
+    * Heading: "How are you feeling right now?"
+    * 5 large emoji face buttons (Very Happy / Happy / Okay / Sad / Stressed)
+    * Optional voice note button: "Say something if you want"
+    * "Done" button
+    * Calming activity suggestion card (appears if sad/stressed selected): "Would you like to try something calming?" with 2-3 activity buttons
+    * Mood history link: "See how you've been feeling"
+* **Navigation:** Done → Home; Calming activity → Life Skills or relevant calming module
+* **Conditional:** Mood logged to Supabase; caregiver notified if stress/negative mood logged (configurable)
+
+#### Screen 23: Mood History
+
+* **Route:** `/mood/history`
+* **UI Elements:**
+    * Weekly emoji timeline (7 days, emoji per day)
+    * Trend summary in plain language: "You felt happy most days this week!"
+    * Full log list (date, emoji, voice note player if recorded)
+    * Share with Helper toggle
+* **Navigation:** Back → Mood Check-In or Home
+
+#### Screen 24: Life-Skills Coach — Module List
+
+* **Route:** `/life-skills`
+* **UI Elements:**
+    * Heading: "Let's practice life skills"
+    * Grid of module cards with large icons and progress rings:
+        * Using Public Transport
+        * Shopping at a Store
+        * Handling Money
+        * Making a Phone Call
+        * Going to the Doctor
+        * Cooking a Simple Meal
+    * Each card shows completion badge if completed
+    * "Start" or "Continue" button on each card
+* **Navigation:** Tap module → Life-Skills Module Screen
+
+#### Screen 25: Life-Skills Module Screen
+
+* **Route:** `/life-skills/:moduleId`
+* **UI Elements:**
+    * Module name and icon (full-width header)
+    * Scenario description in plain language (1-2 sentences max)
+    * Step-by-step simulation: same UI pattern as Task Step View
+    * Multiple-choice decision points (2-3 large option buttons)
+    * Feedback after each choice: "Great choice!" or "Let's try that again" (never punishing)
+    * Points and badge awarded on completion
+    * Restart and Exit buttons
+* **Navigation:** Complete → Completion celebration → Module List; Exit → Module List
+
+#### Screen 26: Gamification / My Rewards
+
+* **Route:** `/rewards`
+* **UI Elements:**
+    * Points balance (large number, top)
+    * Current streak counter with flame icon
+    * Trophy shelf: grid of earned badge images with names
+    * Locked badges (greyed out with hint of what to do to earn)
+    * Weekly progress bar toward next reward
+    * "What can I earn next?" section
+    * TTS reads points and streak
+* **Navigation:** Back → Home
+
+#### Screen 27: Text Simplifier
+
+* **Route:** `/simplify`
+* **UI Elements:**
+    * Heading: "Paste or type difficult text here"
+    * Large multi-line text input with STT mic button
+    * Or: "Take a Photo of Text" button (camera capture → OCR → simplify)
+    * Reading level selector: "Simple" / "Very Simple" toggle
+    * "Simplify It" large button
+    * Loading state: "Making it easier to read…"
+    * Result card: simplified text in large font, TTS auto-plays result
+    * "Save" and "Share" buttons on result
+    * "My Saved Texts" link
+* **Navigation:** Inline result display; "Saved Texts" → Saved Texts Library
+
+#### Screen 28: Saved Texts Library
+
+* **Route:** `/simplify/saved`
+* **UI Elements:**
+    * List of saved simplified texts (title auto-generated from first line, date saved)
+    * Tap → full text view with TTS
+    * Delete option per item
+* **Navigation:** Back → Text Simplifier
+
+#### Screen 29: Settings
+
+* **Route:** `/settings`
+* **UI Elements:**
+    * Sections: Appearance / Speech / Notifications / Privacy / Account / Caregiver Access
+    * **Appearance:** font size slider, theme picker (Default/High Contrast/Warm), information density toggle
+    * **Speech:** TTS speed slider, voice type selector, STT language picker, auto-read on screen load toggle
+    * **Notifications:** per-category reminder toggles, caregiver alert toggle, push notification enable button
+    * **Privacy:** data deletion button, consent review, camera/mic/location permission status with re-request buttons
+    * **Account:** profile photo and name edit, email change, password change, logout button
+    * **Caregiver Access:** linked caregivers list, add/remove caregiver, settings PIN enable/change
+    * TTS reads section headings
+    * Caregiver PIN prompt to access Caregiver Access section
+* **Navigation:** Back → Home
+
+#### Screen 30: Profile Screen
+
+* **Route:** `/profile`
+* **UI Elements:**
+    * Large avatar photo (tappable to edit)
+    * Name and preferred name display
+    * Quick stats: tasks completed today, current streak, total points
+    * Edit Profile button
+    * Linked caregivers avatars row
+    * Settings shortcut
+* **Navigation:** Back → Home; Edit → Profile Edit (subset of Settings)
+
+#### Screen 31: Help & Support
+
+* **Route:** `/help`
+* **UI Elements:**
+    * "How can we help?" heading
+    * FAQ cards (accordion, large touch targets): "How do I add a reminder?", "How do I call my helper?", etc.
+    * Each FAQ answer delivered as plain text + TTS
+    * "Contact Support" button (opens mailto or in-app message form)
+    * "Take the App Tour" button (re-triggers onboarding walkthrough overlay)
+* **Navigation:** Back → Home or Settings
+
+***
+
+### 5.3 Caregiver Screens
+
+#### Screen 32: Caregiver Dashboard Home
+
+* **Route:** `/caregiver/dashboard`
+* **UI Elements:**
+    * Top bar: caregiver name, avatar, settings icon
+    * Linked user selector (dropdown if multiple users linked)
+    * Summary cards: Tasks Completed Today, Reminders Acknowledged, Mood Today, Last Active time
+    * Alert feed: missed reminders, "I'm Lost" triggers, adaptation events (each with timestamp and action buttons)
+    * Quick action buttons: "Add Task," "Add Reminder," "View Schedule," "Send Note"
+    * Bottom navigation: Dashboard / Schedule / Tasks / Progress / Notes
+* **Navigation:** Cards/buttons → respective caregiver sub-screens
+
+#### Screen 33: Caregiver — Schedule Manager
+
+* **Route:** `/caregiver/schedule`
+* **UI Elements:**
+    * Week view calendar (compact, appropriate for caregiver density preferences)
+    * Add / Edit / Delete event controls
+    * Event form: title, icon picker, time, repeat, notes, photo attachment
+    * Real-time sync indicator
+* **Navigation:** Back → Caregiver Dashboard
+
+#### Screen 34: Caregiver — Task Manager
+
+* **Route:** `/caregiver/tasks`
+* **UI Elements:**
+    * Full task list for linked user with status columns
+    * Create task button with AI decomposition option
+    * Edit and reorder steps for existing tasks
+    * Assign photos to each step (upload from device)
+    * Archive completed tasks
+* **Navigation:** Back → Caregiver Dashboard
+
+#### Screen 35: Caregiver — Progress & Reports
+
+* **Route:** `/caregiver/progress`
+* **UI Elements:**
+    * Date range picker
+    * Charts: task completion rate (bar), mood trends (emoji timeline), reminder adherence (percentage ring)
+    * Adaptation events log (when and what simplifications were triggered)
+    * Life-skills module completion table
+    * Export to PDF button
+* **Navigation:** Back → Caregiver Dashboard
+
+#### Screen 36: Caregiver — Shared Notes
+
+* **Route:** `/caregiver/notes`
+* **UI Elements:**
+    * Notes feed (newest first) showing author avatar, timestamp, and note content
+    * New note compose box (text + voice note attachment)
+    * Linked caregivers/teachers list (who can see notes)
+    * Pin important notes to top
+    * Real-time updates via Supabase Realtime
+* **Navigation:** Back → Caregiver Dashboard
+
+#### Screen 37: Caregiver — Alert Settings
+
+* **Route:** `/caregiver/alerts`
+* **UI Elements:**
+    * Per-reminder escalation thresholds (number of missed times before alert, delay between re-prompts)
+    * Mood alert thresholds (notify when mood logged as Stressed/Sad)
+    * "I'm Lost" location alert toggle
+    * Notification channel preferences (push, email)
+    * Save button
+* **Navigation:** Back → Caregiver Dashboard
+
+#### Screen 38: Caregiver — Account & Linked Users
+
+* **Route:** `/caregiver/account`
+* **UI Elements:**
+    * Caregiver profile edit (name, photo, email)
+    * Linked users list with invite status
+    * Accept/decline pending invites
+    * Remove linked user option
+    * Logout
+* **Navigation:** Back → Caregiver Dashboard
+
+***
+
+### 5.4 Notifications & Modals (Overlay Screens)
+
+#### Screen 39: Reminder Notification Overlay
+
+* **Trigger:** Service worker push notification or in-app timer
+* **UI Elements:**
+    * Full-screen takeover (non-dismissible until action taken)
+    * Large icon and reminder name
+    * "Done — I did it!" and "Remind me in 10 minutes" large buttons
+    * TTS reads reminder name automatically
+* **Conditional:** If missed N times → triggers caregiver alert via Supabase
+
+#### Screen 40: Adaptive Help Modal
+
+* **Trigger:** Automated detection of struggle (3+ errors or 60s+ inactivity on a step)
+* **UI Elements:**
+    * Semi-transparent overlay on current screen
+    * Friendly character illustration
+    * "Do you need help?" heading
+    * 3 large option buttons: "Try Again," "Make It Simpler," "Call My Helper"
+    * Dismiss button (small, secondary)
+    * TTS reads options
+
+#### Screen 41: Calming Activity Suggestion Modal
+
+* **Trigger:** Negative/stressed mood logged on Mood Check-In
+* **UI Elements:**
+    * "Let's take a moment" heading
+    * 2-3 activity suggestion cards (Breathing exercise, Listen to music, Take a short walk)
+    * Tap activity → guided calming activity screen (simple breathing animation or audio player)
+    * "I'm okay, thanks" dismiss button
+
+***
+
+## 6\. App Menu and Navigation Structure
+
+### 6.1 Navigation System
+
+EasyPath PWA uses a **persistent bottom navigation bar** as the primary navigation system for the user role, ensuring all primary sections are reachable with a single thumb tap without hidden menus or multi-level hierarchies.
+
+### 6.2 User Bottom Navigation Bar (5 items)
+
+| Icon | Label | Route |
+| ---- | ----- | ----- |
+| 🏠 House | Home | `/home` |
+| 📅 Calendar | Schedule | `/schedule` |
+| ✅ Checkmark | Tasks | `/tasks` |
+| 💬 Chat Bubble | Simplify | `/simplify` |
+| 👤 Person | Profile | `/profile` |
+
+### 6.3 Floating Action Button
+
+* Persistent amber **"Explain This" camera button** floating above the bottom nav bar (center or bottom-right)
+* Routes to `/camera-helper`
+* Visible on Home, Schedule, Tasks, and Profile screens
+
+### 6.4 Access to Secondary Sections (from Home shortcuts and Profile)
+
+* Reminders → `/reminders`
+* Memory Aid → `/memory-aid/contacts`
+* Life Skills → `/life-skills`
+* Rewards → `/rewards`
+* Mood → `/mood`
+* Safe Navigation → `/navigation`
+* Settings → `/settings`
+* Help → `/help`
+
+### 6.5 Caregiver Navigation (Separate Role)
+
+Caregivers have a separate **bottom navigation bar** with 5 items:
+
+| Icon | Label | Route |
+| ---- | ----- | ----- |
+| 📊 Chart | Dashboard | `/caregiver/dashboard` |
+| 📅 Calendar | Schedule | `/caregiver/schedule` |
+| ✅ Checkmark | Tasks | `/caregiver/tasks` |
+| 📈 Progress | Progress | `/caregiver/progress` |
+| 📝 Notes | Notes | `/caregiver/notes` |
+
+Caregiver settings and account management accessible via avatar tap (top-right) → `/caregiver/account`
+
+### 6.6 Navigation Hierarchy Summary
+
+```
+Root
+├── /                          Welcome/Splash
+├── /onboarding/               Onboarding Flow (role → profile → accessibility → caregiver link)
+├── /login                     Login
+│
+├── [USER AUTHENTICATED]
+│   ├── /home                  Home Dashboard
+│   ├── /schedule              Daily Schedule
+│   ├── /tasks                 Task List
+│   │   ├── /tasks/new         Task Creation
+│   │   └── /tasks/:id/step/:n Task Step View
+│   │       └── /tasks/:id/complete   Complete Screen
+│   ├── /reminders             Reminders
+│   │   └── /reminders/new|:id/edit
+│   ├── /camera-helper         Camera Helper
+│   ├── /memory-aid
+│   │   ├── /contacts          Contacts Grid
+│   │   └── /objects           Objects Grid
+│   ├── /navigation            Safe Navigation
+│   │   └── /navigation/lost   I'm Lost Screen
+│   ├── /mood                  Mood Check-In
+│   │   └── /mood/history
+│   ├── /life-skills           Module List
+│   │   └── /life-skills/:id   Module Screen
+│   ├── /rewards               Gamification
+│   ├── /simplify              Text Simplifier
+│   │   └── /simplify/saved
+│   ├── /profile               Profile
+│   ├── /settings              Settings
+│   └── /help                  Help & Support
+│
+└── [CAREGIVER AUTHENTICATED]
+    ├── /caregiver/dashboard
+    ├── /caregiver/schedule
+    ├── /caregiver/tasks
+    ├── /caregiver/progress
+    ├── /caregiver/notes
+    ├── /caregiver/alerts
+    └── /caregiver/account
+```
+
+### 6.7 Navigation Principles
+
+* Every screen has a **back button** (top-left) except the Home Dashboard and Caregiver Dashboard
+* Maximum navigation depth: **3 levels** from home to any screen
+* No hamburger menus or hidden navigation drawers in the user interface
+* Breadcrumb trail shown as step counter on task/module flows only
+* Voice navigation command "Go home" or "Go back" available in voice-first mode at all times
+
+***
+
+## 7\. User Flow
+
+### 7.1 New User Onboarding Flow
+
+1. User opens the EasyPath PWA URL on their device; the browser prompts "Add to Home Screen" (PWA install prompt)
+2. App loads to the **Welcome / Splash Screen** (`/`); TTS automatically reads "Welcome to EasyPath. Here to help you every day."
+3. User taps **"Get Started"** → navigates to **Role Selection** (`/onboarding/role`)
+4. User taps **"I am the main user"** → navigates to **Profile Setup** (`/onboarding/profile`)
+5. User adds a photo (or skips), enters their name via keyboard or microphone, and taps **"Next"**
+6. User arrives at **Accessibility Preferences** (`/onboarding/accessibility`): selects large font, high contrast theme, slow speech speed; taps **"Next"** — settings saved to Supabase
+7. User arrives at **Caregiver Link** (`/onboarding/caregiver-link`): enters caregiver's email and taps **"Send Invite"**; confirmation shown; taps **"Done — Go to My Home"**
+8. User arrives at **Home Dashboard** (`/home`); TTS reads greeting; app shows "No tasks yet — let's add one!" empty state card
+
+***
+
+### 7.2 Daily Routine Flow (Returning User)
+
+1. User opens app from home screen icon; Supabase Auth session auto-restores; lands on **Home Dashboard**
+2. TTS reads: "Good morning, Alex! You have 4 things today. Next up: Take your morning medicine at 8:00 AM."
+3. User taps the **"What's Next"** card → navigates to **Task Step View** Step 1: "Open your medicine cabinet. Tap Done when you're ready."
+4. User taps **"Done — Next Step"**; Step 2 loads: "Take 1 blue tablet with water." TTS reads instruction automatically
+5. User completes all 4 steps; **Task Complete Screen** loads; gentle star animation plays; "10 points earned!" badge shown; TTS reads "You did it, Alex! Great job."
+6. User taps **"Back to Home"**; streak counter on Home increments
+7. User taps **Schedule** in bottom nav → **Daily Schedule View**; sees color-coded timeline for the day
+8. User taps the 10:00 AM "Doctor Appointment" event → Task Step View for pre-configured appointment steps
+
+***
+
+### 7.3 "Explain This to Me" Feature Flow
+
+1. User receives a letter in the mail and cannot understand it
+2. User opens app → taps the floating amber **"Explain This"** camera button
+3. **Camera Helper** screen opens in "Explain This" mode; user points camera at the letter
+4. User taps the large shutter button; photo captured and sent to Supabase Edge Function → GPT-4o Vision
+5. Loading screen: "Figuring this out for you…" (gentle pulse animation)
+6. Result card appears with simplified text in large font; TTS automatically reads the explanation aloud: "This letter is from your bank. It says your account is fine. No action needed."
+7. User taps **"Save"** to add to Saved Texts library or **"Share with Helper"** to send to caregiver via Supabase shared notes
+
+***
+
+### 7.4 Caregiver Setup and Monitoring Flow
+
+1. Caregiver receives invite email, clicks link → arrives at **Role Selection** (`/onboarding/role`) with "I am a caregiver" pre-selected
+2. Caregiver completes caregiver account setup (name, email, password)
+3. Caregiver lands on **Caregiver Dashboard** (`/caregiver/dashboard`); linked user's summary is shown
+4. Caregiver navigates to **Schedule Manager** via bottom nav → adds tomorrow's routine: 8 AM Medicine, 9 AM Breakfast, 2 PM Physiotherapy; uploads a photo for the physiotherapy step showing the clinic entrance
+5. Caregiver navigates to **Task Manager** → creates task "Pack gym bag" → taps "Break it into steps for me" → AI generates 5 steps → caregiver adds photos for each step → saves
+6. Caregiver navigates to **Alert Settings** → sets "Notify me if medicine reminder is missed twice" and enables mood alerts for Stressed/Sad moods
+7. Next morning: user misses medicine reminder; after second miss, Supabase Edge Function sends push notification to caregiver: "Alex hasn't acknowledged the 8 AM medicine reminder."
+8. Caregiver opens app → sees alert in Dashboard alert feed → taps to send a message to user via Shared Notes: "Hi Alex, don't forget your medicine! It's in the cabinet."
+9. User sees shared note as a notification card on Home Dashboard; TTS reads it aloud
+
+***
+
+### 7.5 "I'm Lost" Safety Flow
+
+1. User is traveling to physiotherapy using **Safe Navigation** (`/navigation`)
+2. User inputs "Physiotherapy Clinic" via voice → step-by-step landmark directions generated
+3. User proceeds through 3 steps successfully, confirming each one
+4. At step 4, user becomes confused and taps the large **"I'm Lost"** red button
+5. App captures GPS location via Geolocation API; sends location coordinates and timestamp to caregiver via Supabase Realtime
+6. User is taken to **"I'm Lost" Confirmation Screen** (`/navigation/lost`); TTS reads: "It's okay. Your helper has been told where you are."
+7. Caregiver receives push notification: "Alex pressed I'm Lost. Location: [address]. Tap to view map."
+8. User taps **"Call [Caregiver Name]"** → device native phone dialer opens
+9. After situation resolved, user taps **"I'm Okay Now — Go Back"** → returns to navigation step 4
+
+***
+
+### 7.6 Mood Check-In and Calming Flow
+
+1. App sends a gentle push notification at 3 PM: "How are you feeling? Tap to check in."
+2. User taps notification → **Mood Check-In Screen** (`/mood`)
+3. User taps the "Stressed" emoji face
+4. **Calming Activity Suggestion Modal** appears: "Let's take a moment. Try one of these:"
+5. User taps "Breathing Exercise" → a full-screen breathing guide loads: a slow expanding/contracting circle with text "Breathe in… Breathe out…" and calming audio
+6. After 2-minute exercise, "Well done! That took courage." message shown with 5 points earned
+7. Mood log saved to Supabase; caregiver is notified via push: "Alex logged a stressed mood at 3:04 PM and completed a calming activity."
+
+***
+
+### 7.7 Text Simplifier Flow
+
+1. User navigates to **Simplify** tab in bottom nav → **Text Simplifier** (`/simplify`)
+2. User taps microphone and dictates the text they want simplified, or taps "Take a Photo of Text" and photographs a document
+3. User selects "Very Simple" reading level and taps "Simplify It"
+4. GPT-4o processes text via Supabase Edge Function; result appears in large font; TTS auto-reads
+5. User taps "Save" → text saved to **Saved Texts Library** (`/simplify/saved`) with auto-generated title
+6. Later, user opens Saved Texts, taps the saved entry, and TTS re-reads the simplified content
+
+***
+
+### 7.8 Life-Skills Coach Flow
+
+1. User navigates to Life Skills via Home shortcut grid → **Module List** (`/life-skills`)
+2. User taps "Shopping at a Store" module card → **Module Screen** (`/life-skills/shopping`)
+3. TTS reads scenario: "Let's practice buying bread at the shop. I'll guide you through each step."
+4. User proceeds through simulated steps: picking up a basket, finding the bread aisle (landmark-style visual), choosing a loaf, going to the checkout
+5. At checkout step, a decision point appears: "The cashier asks 'Do you have a loyalty card?' What do you do?" — 2 large option buttons: "Say No thank you" / "Say Yes and give my card"
+6. User selects "Say No thank you" → "Perfect! That's exactly right." feedback + 15 points
+7. User completes module → **Module complete** celebration screen → "Shopping Badge" awarded; visible on Trophy Shelf in Rewards screen
+
+***
+
+*End of EasyPath PRD*

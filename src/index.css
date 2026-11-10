@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-heading: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  --color-canvas: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-primary: #4A90D9;
+  --color-primary-dark: #2C5F8A;
+  --color-secondary: #68B28A;
+  --color-accent: #F5A623;
+  --color-alert: #E8695A;
+  --color-success: #4CAF7D;
+  --color-text-main: #2D2D2D;
+  --color-text-muted: #6B6B6B;
+  --color-border: #E8E5DF;
+  --base-font-size: 18px;
+}
+
+/* High Contrast Mode */
+.theme-high-contrast {
+  --color-canvas: #000000;
+  --color-surface: #121212;
+  --color-primary: #FFFF00;
+  --color-primary-dark: #00E5FF;
+  --color-secondary: #00FF66;
+  --color-accent: #FFD700;
+  --color-alert: #FF4D4D;
+  --color-success: #00FF66;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #E0E0E0;
+  --color-border: #FFFFFF;
+}
+
+/* Warm Mode */
+.theme-warm {
+  --color-canvas: #FBF6EE;
+  --color-surface: #FFFDF9;
+  --color-primary: #52796F;
+  --color-primary-dark: #354F52;
+  --color-secondary: #84A98C;
+  --color-accent: #E07A5F;
+  --color-alert: #D62828;
+  --color-success: #588157;
+  --color-text-main: #2F3E46;
+  --color-text-muted: #52796F;
+  --color-border: #E6DCCD;
+}
+
+/* Font Size Scales */
+.text-scale-normal {
+  --base-font-size: 18px;
+}
+
+.text-scale-large {
+  --base-font-size: 22px;
+}
+
+.text-scale-xlarge {
+  --base-font-size: 26px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-text-main);
+  font-size: var(--base-font-size);
+  line-height: 1.6;
+  letter-spacing: 0.015em;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+/* Safe Area Insets for mobile PWA */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
+}
+
+/* Touch targets >= 44px */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

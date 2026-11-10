@@ -1,0 +1,6 @@
+{
+  "name": "EasyPath",
+  "description": "Accessibility-first cognitive support Progressive Web App empowering independence with visual micro-steps, smart reminders, voice guidance, and Gemini AI assistance.",
+  "requestFramePermissions": ["geolocation", "microphone", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

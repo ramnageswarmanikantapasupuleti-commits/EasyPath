@@ -1,0 +1,276 @@
+EasyPath: Project Implementation Plan
+Prepared November 9, 2026, from the EasyPath PRD (PWA, React + Vite, Supabase, GPT-4o)
+1. Summary
+EasyPath is large: 41 screens, two user roles, offline support, AI features, real-time alerts and strict accessibility requirements. Built all at once it would take most teams many months, and the riskiest parts (reliable reminders, privacy, real-user usability) would be discovered too late. This plan therefore builds it in seven phases, each ending with something that can be shown to real users and caregivers.
+Assumptions (change these if they are wrong)
+• Team of 1 to 2 developers, plus a designer or design help part-time, working about 25 to 40 hours a week each.
+• Target: a usable MVP in about 16 weeks (Phases 0 to 4) and a full PRD scope in about 28 weeks (Phases 0 to 6).
+• Budget is small, so managed services (Supabase, Vercel or Netlify) are used wherever possible.
+• Primary launch audience is a small pilot group, not the public.
+What I recommend you do first
+1. Pick one primary user group for the pilot (for example young adults with mild intellectual disability, or people with early memory loss) and find 3 to 5 users plus their caregivers willing to test.
+2. Build the vertical slice first: login, caregiver adds a task and a reminder, user receives and completes it. Everything else is built on that.
+3. Treat reminder reliability and privacy as design problems from week 1, not as late polish.
+2. Guiding Principles
+• Real users over features. Every phase ends with a usability session. Findings change the next phase's scope.
+• Accessibility is a requirement, not a phase. Every screen is built to WCAG 2.1 AA and the cognitive accessibility guidance from the start, using the design tokens in Phase 1.
+• One task per screen, always. If a screen needs scrolling or a second decision, it is split.
+• Thin vertical slices. Finish a feature end to end (UI, database, offline, caregiver side) before starting the next.
+• Safe AI. All AI calls go through Edge Functions, outputs are short and plain, and the app never gives medical, legal or financial instructions as fact. It explains, and points to a caregiver or professional when unsure.
+• Privacy by default. Collect the minimum, ask consent explicitly, and make deletion easy.
+3. Phase Overview
+Phase
+Weeks
+Goal
+Exit milestone
+0. Discovery and setup
+1 to 2
+Validate scope, set up tools, design foundations
+Repos, environments and clickable prototype ready
+1. Foundation
+3 to 5
+Design system, auth, onboarding, PWA shell
+A user can sign up, set preferences and install the PWA
+2. Core daily-use loop
+6 to 9
+Tasks, schedule, reminders, TTS and STT, offline
+A user completes a task from a reminder, offline included
+3. AI features
+10 to 12
+Task breakdown, text simplifier, Explain This
+AI features work safely through Edge Functions
+4. Caregiver and safety
+13 to 16
+Caregiver dashboard, notes, alerts, I'm Lost, navigation
+MVP pilot begins
+5. Engagement and support
+17 to 23
+Mood, memory aid, gamification, life skills, adaptive engine
+Full user-side feature set
+6. Hardening and launch
+24 to 28
+Accessibility audit, security, performance, pilot fixes
+Public launch candidate
+4. Phase Details
+Phase 0: Discovery and Setup (weeks 1 to 2)
+Goals: reduce risk before writing much code.
+• Interview 3 to 5 potential users and their caregivers (or an organisation that supports them). Ask about devices used, daily routines, what they find confusing in apps, and who they trust to see their data.
+• Choose the pilot group and write down the 3 most important user stories, for example "My caregiver sets my medicine routine and I get reminded" and "I can understand a letter I received".
+• Finalise scope for MVP versus later (see section 7).
+• Create the Git repository, a branch strategy (main, develop, feature branches) and CI (lint, type check, tests on every pull request).
+• Create Supabase projects for development and production. Set up Vercel or Netlify with preview deployments for HTTPS testing on real phones.
+• Use TypeScript throughout. It prevents many bugs and makes Supabase types generate automatically.
+• Wireframe the 8 core screens in Figma (Home, Task Step, Task List, Reminder, Schedule, Caregiver Dashboard, Camera Helper, Settings) and test them with paper or clickable prototypes.
+• Check the accessibility of the PRD color palette (contrast ratios) and fix the typo in the secondary color (use #68B28A).
+Deliverables: research notes, prioritised backlog, Figma prototype, working CI and two environments.
+Phase 1: Foundation (weeks 3 to 5)
+Build
+• Vite + React + TypeScript + Tailwind project, React Router, Zustand.
+• Design tokens for colors, font sizes (18 to 32 px), spacing and themes (Default, High Contrast, Warm). Themes work through CSS variables so a single setting switches the whole app.
+• Core component library: LargeButton (icon + label always), StepCard, BottomNav, TTSButton, Modal, Snackbar with undo, EmptyState, PulseSkeleton, ProgressDots. Each component is documented and keyboard and screen-reader tested.
+• Supabase Auth: email and password, magic link, roles (user, caregiver). Row Level Security (RLS) enabled on every table from day one.
+• Onboarding screens 1 to 5 and login screens 6 and 7.
+• PWA shell with vite-plugin-pwa: manifest, icons, install prompt, a basic service worker caching static assets, offline banner.
+• Persistent settings: font size, theme, density and speech speed stored in Zustand, synced to the profiles table.
+• Global prefers-reduced-motion handling and Framer Motion wrapper.
+Done when: a new user can sign up, set preferences, see them applied immediately, install the app to a phone home screen, and the whole flow passes an automated accessibility check (axe) with no critical issues.
+Phase 2: Core Daily-Use Loop (weeks 6 to 9)
+Build
+• Home Dashboard (screen 8) with time-aware greeting, What's Next card and shortcut grid.
+• Tasks: list, creation with manual step entry (AI comes in Phase 3), Task Step View, Task Complete screen.
+• Daily Schedule (screen 9) with the timeline and color-coded categories.
+• Reminders (screens 14, 15, 39): create, repeat, snooze, acknowledge, full-screen reminder overlay.
+• TTS and STT: a single useSpeech hook wrapping the Web Speech API, with a pluggable provider so OpenAI TTS can be swapped in later. Per-screen auto-read setting.
+• Offline layer: Workbox runtime caching, IndexedDB (through a small wrapper such as Dexie) for tasks, schedule and reminders, and a background-sync queue for completions.
+• Basic points on task completion (full gamification comes later).
+Reminder delivery strategy (important)
+Browsers cannot guarantee that a service worker fires a notification at an exact time while offline, and iOS only supports web push for PWAs that have been added to the Home Screen. Plan for layers:
+1. Server-scheduled Web Push from a Supabase scheduled Edge Function (works when the phone is online, even if the app is closed).
+2. In-app timers when the app is open, with the full-screen overlay.
+3. Catch-up on open: when the app opens, show any reminders that were due while it was closed.
+4. Be honest in the UI and in onboarding: "Keep EasyPath installed and notifications on."
+If pilot testing shows this is not reliable enough for medicine reminders, a thin native wrapper (Capacitor) can be added later to use native local notifications. Decide this at the end of Phase 2, not at launch.
+Done when: on a real Android phone and a real iPhone, a caregiver-created reminder arrives, the user completes the task steps, and completion syncs after a period of being offline.
+Phase 3: AI Features (weeks 10 to 12)
+Build
+• Supabase Edge Functions (Deno), one per capability: break-down-task, simplify-text, explain-image, identify-object. Each validates the caller's JWT, applies per-user rate limits and returns structured JSON.
+• Model configuration in one place (an environment variable), so you can change from GPT-4o to a newer or cheaper model without code changes. Confirm current model names and pricing on OpenAI's site when you start.
+• Prompt design: reading-level instructions, maximum sentence length, "never invent facts", "if unsure say so", and safety wording for medicine, money and legal documents (explain what the text says, then suggest asking a caregiver or professional).
+• Task Creation with "Break it into steps for me" (editable preview, manual fallback offline).
+• Text Simplifier (screens 27 and 28) with Saved Texts. Use the vision model for photo input, which removes the need for a separate OCR library.
+• Camera Helper (screen 16) with Explain This mode, including client-side image resizing and compression before upload to save cost and time.
+• Cost controls: daily request caps per user, logging token usage, and a monthly budget alert in the OpenAI dashboard.
+Done when: 20 sample documents, labels and goals produce outputs that a reviewer (ideally a caregiver) rates as correct, simple and safe, and the AI features fail gracefully (friendly message, manual fallback) when offline or rate limited.
+Phase 4: Caregiver and Safety (weeks 13 to 16)
+Build
+• Caregiver onboarding via invite link, the consent grant flow (the user or guardian approves each caregiver) and the caregiver_links table with RLS so a caregiver can only see linked users.
+• Caregiver Dashboard, Schedule Manager, Task Manager (with photo upload to Supabase Storage), Shared Notes with Realtime, Alert Settings, Account (screens 32 to 38). Progress and Reports comes in a simple form now (completion counts) and charts later.
+• Missed-reminder escalation: Edge Function that counts unacknowledged reminders and sends Web Push (and optional email) to the caregiver.
+• Safe Navigation (screens 20, 21) and I'm Lost: location capture, Realtime push to the caregiver, confirmation screen, native call link.
+• PIN lock for settings.
+• Settings and Profile screens (29 and 30), including data deletion.
+Navigation: keep scope realistic. Nominatim is a geocoding service, not a source of rich landmark directions, and its public server has a strict usage policy (about one request per second, no heavy use). Suggested approach:
+1. For the MVP, let caregivers pre-build routes for the user's regular destinations (home, clinic, shop) with a landmark photo and plain instruction at each step. This is far safer and more useful than auto-generated directions.
+2. Later, add auto-generated routes using a routing service plus landmark lookups (for example OpenStreetMap data through the Overpass API), cached for offline use. Use a hosted or self-hosted routing service rather than the public Nominatim server for production traffic.
+3. Make clear in the UI that I'm Lost shares location only when pressed, and that it is not an emergency service. Show a link to call emergency numbers.
+Done when: a full pilot loop works: caregiver sets up a day, the user follows it, a missed reminder alerts the caregiver, and an I'm Lost press delivers a location to the caregiver within seconds. Start the pilot with 3 to 5 users now.
+Phase 5: Engagement and Support (weeks 17 to 23)
+Build in this order, and drop or defer items based on pilot feedback.
+1. Mood check-ins (screens 22, 23, 41): emoji logging, voice note, calming activities (breathing animation with reduced-motion alternative), caregiver mood alerts.
+2. Memory Aid (screens 17 to 19): contacts and objects with photos and voice notes. See the privacy note below on "Who is this?".
+3. Gamification (screen 26): points ledger, streaks that pause instead of break, badges, calm celebration animations.
+4. Adaptive Interface Engine (screen 40): start with simple, transparent rules (3 wrong taps or 60 seconds idle on a step), log events for caregivers. Make it configurable and easy to turn off.
+5. Life-Skills Coach (screens 24, 25): build a module engine driven by JSON (scenes, choices, feedback) so new modules are content, not code. Ship 2 modules first (Shopping, Making a Phone Call) and add the rest.
+6. Voice-first mode: a small command vocabulary ("go home", "go back", "next", "read it again") before attempting free-form voice navigation.
+7. Progress and Reports charts and PDF export for caregivers.
+8. Help and Support (screen 31) and the in-app tour.
+Privacy note on "Who is this?"
+Identifying a stranger from a photo is not part of the PRD, and it should stay that way. The feature should only match a photo against people the user or caregiver has saved. Doing this reliably means face recognition, which handles biometric data and has serious privacy and legal implications. Options, from safest to most complex: (a) the user picks the person from their contact grid (no recognition); (b) the app compares against a few saved photos on the device only, with explicit consent; (c) server-side recognition, which I would avoid. Start with (a).
+Phase 6: Hardening and Launch (weeks 24 to 28)
+• Accessibility audit: automated (axe, Lighthouse) plus manual testing with a screen reader (TalkBack, VoiceOver), keyboard only, 200 percent zoom, and high contrast. Ideally an expert review by an accessibility specialist.
+• Usability testing with the pilot users on every main flow. Fix the top issues first.
+• Security review: RLS policy tests for every table and storage bucket, rate limits, secrets only in Edge Functions, dependency audit, and basic penetration checks.
+• Performance: Lighthouse PWA score above 90, first load under 3 seconds on a mid-range Android phone over 4G, lazy-loaded routes.
+• Cross-device testing: Android Chrome, iOS Safari (installed PWA), a low-end Android phone, and a tablet.
+• Legal and policy: privacy policy and terms in plain language, consent text reviewed, data retention rules, and a process for data deletion requests. Because the app handles health-related and location data, get a legal review of the data protection requirements in the places you will launch (for India, check the Digital Personal Data Protection Act requirements, including consent for people who have a lawful guardian).
+• Monitoring: error tracking (for example Sentry), uptime checks, Supabase and OpenAI usage dashboards, and a support email.
+• Launch: soft launch to partner organisations or a waitlist first, then wider release.
+5. Architecture and Data Model
+Architecture
+• Client: React PWA, Zustand for UI state, IndexedDB for offline data, a service worker for caching and sync.
+• Backend: Supabase Postgres with Row Level Security, Auth, Storage and Realtime.
+• Edge Functions: AI calls, reminder escalation, push dispatch, scheduled jobs (reminder checks every minute).
+• Third parties: OpenAI (text, vision, optional TTS), Web Push, OpenStreetMap-based services.
+Core tables (starting point)
+Table
+Purpose
+profiles
+Name, role, photo, accessibility settings, PIN hash
+caregiver_links
+user_id, caregiver_id, status, consent_at, permissions
+tasks, task_steps
+Tasks and ordered steps with text, icon, photo path
+schedule_events
+Title, category, time, repeat rule, photo, created_by
+reminders, reminder_events
+Definitions, and each delivery with status (sent, acknowledged, missed)
+task_completions
+Completed tasks with timestamps (offline-sync safe)
+mood_logs
+Mood value, voice note path, shared flag
+contacts, objects
+Memory aid items with photos and notes
+simplified_texts
+Saved text library
+points_ledger, badges, user_badges, streaks
+Gamification
+lifeskill_modules, lifeskill_progress
+Module content (JSON) and progress
+shared_notes
+Caregiver and user notes
+adaptation_events
+Logged simplifications and help requests
+location_alerts
+I'm Lost events with coordinates and time
+push_subscriptions
+Web Push endpoints per device
+Rules to apply from the start
+• Every table has user_id and RLS policies. Caregivers read a user's data only through an active, consented caregiver_links row.
+• Storage buckets are private, with signed URLs and per-user folders.
+• Offline writes use client-generated UUIDs and updated_at, so syncing the same item twice is harmless.
+• Location data is kept only as long as needed (for example 30 days) and deleted automatically.
+6. Testing Strategy
+• Unit tests (Vitest) for hooks, reminder logic, adaptive rules and sync queue.
+• Component tests (React Testing Library) for the design system, including accessibility assertions.
+• End to end (Playwright) for the critical flows: onboarding, reminder to task completion, caregiver alert, offline then sync.
+• Database tests for RLS policies: confirm that one user, or an unlinked caregiver, cannot read another user's rows.
+• AI evaluation set: a saved list of 30 to 50 test inputs (documents, labels, goals) re-run whenever prompts or models change, with outputs reviewed for correctness and reading level.
+• Real-device testing on every phase milestone, not only emulators.
+• Usability sessions at the end of each phase with at least 3 users, using a simple script and recording what they struggle with.
+7. Scope Control: MVP versus Later
+MVP (Phases 0 to 4)
+Later (Phases 5 and 6)
+Onboarding, auth, preferences, PWA install
+Adaptive Interface Engine
+Tasks with manual and AI steps
+Life-Skills Coach (full set)
+Schedule and reminders with escalation
+Gamification (badges, trophy shelf)
+TTS and STT
+Voice-first full navigation
+Text Simplifier and Explain This
+Auto-generated landmark routes
+Caregiver dashboard, notes, alerts
+Reports with charts and PDF export
+Caregiver-built routes and I'm Lost
+Mood trends, object recognition
+Settings, PIN, data deletion
+Multi-language support beyond 1 to 2 languages
+If time runs short, protect the MVP column and the accessibility audit. Cut from the right-hand column.
+8. Risks and Mitigations
+Risk
+Why it matters
+Mitigation
+Reminders not firing reliably (especially iOS and offline)
+Missed medicine reminders are a real harm
+Layered delivery (Phase 2), honest onboarding copy, early device testing, Capacitor wrapper as a fallback
+Privacy and consent for health, photo and location data
+Users may be vulnerable and unable to judge risk
+Explicit consent flows, minimal data, guardian consent path, legal review before launch, deletion tools
+AI gives wrong or unsafe explanations
+A wrong medicine or bill explanation can cause harm
+Safety prompts, "ask your helper" wording, evaluation set, option to share any result with a caregiver
+Face or object recognition overreach
+Biometric data and misidentification
+Start with user-selected contacts, no stranger identification
+Web Speech API gaps
+Speech recognition differs by browser and may need internet
+Always provide typed input, test on target devices, plan a server-side STT fallback
+Scope too large
+41 screens is a lot for a small team
+Vertical slices, strict MVP, review after each phase
+AI and push costs grow
+Small budget
+Rate limits, image compression, cached responses, budget alerts
+Not enough real user feedback
+Accessible by checklist is not the same as usable
+Recruit pilot users in Phase 0, test every phase
+Landmark navigation quality
+Poor directions in an unfamiliar place are dangerous
+Caregiver-built routes first, clear "not an emergency service" note
+9. First Four Weeks: Task Checklist
+Week 1
+[ ] Choose pilot group, contact 3 to 5 potential users and a caregiver or support organisation
+[ ] Create GitHub repo, TypeScript Vite project, ESLint and Prettier
+[ ] Create Supabase dev project and a Vercel or Netlify project with preview deploys
+[ ] Start Figma file with the color palette and type scale
+Week 2
+[ ] Run first interviews, write 3 user stories and update the backlog
+[ ] Wireframe and click-test 8 core screens
+[ ] Set up CI (lint, type check, unit tests), Playwright and axe
+[ ] Draft the database schema and RLS policy plan
+Week 3
+[ ] Implement design tokens, themes, fonts (Nunito and Atkinson Hyperlegible) and the first 6 components
+[ ] Configure vite-plugin-pwa, manifest and icons
+[ ] Supabase Auth with roles, profiles table and first RLS policies
+Week 4
+[ ] Build screens 1 to 7 (welcome, role, profile, accessibility, caregiver link, login, reset)
+[ ] Persist preferences and apply them live
+[ ] Install the PWA on one Android phone and one iPhone, and test with a screen reader
+[ ] Phase 1 review with a user or caregiver
+10. Definition of Done (applies to every feature)
+• Works on Android Chrome and iOS Safari (installed PWA)
+• Passes axe with no serious issues, keyboard and screen-reader usable, touch targets at least 44 px
+• Honors font size, theme and reduced-motion settings
+• Has a friendly empty, loading, error and offline state
+• Has TTS for all key text
+• RLS policy and tests written for any new table
+• Unit or end-to-end test added, and the change reviewed
+• Tried by at least one real user or caregiver before the phase is closed
+11. Decisions Needed From You
+1. Which user group will you pilot with first?
+2. How many developers and hours per week are available? (This sets the real timeline.)
+3. Is a native wrapper (Capacitor) acceptable if PWA reminders prove unreliable?
+4. Which languages are needed at launch?
+5. Who will own legal and privacy review before public launch?
+When you have answers, this plan can be tightened into a sprint-by-sprint schedule.

@@ -1,0 +1,6 @@
+{
+  "summary":  "Architectural and implementation plan for EasyPath, an accessibility-first Progressive Web App for individuals with cognitive disabilities and their caregivers. Covers dual-mode role switching, Gemini AI-powered task decomposition and camera helper, PWA offline capabilities, Web Speech TTS/STT, and WCAG AA design.",
+  "updatedAt":  "2026-11-10T15:21:40.646447738Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}
