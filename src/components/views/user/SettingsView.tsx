@@ -35,6 +35,7 @@ export const SettingsView: React.FC = () => {
     setActiveView,
     setIsSanctuaryOpen,
     setShowCalmingModal,
+    replayIntroAnimation,
   } = useApp();
   const { speak } = useSpeech(settings.speechSpeed);
 
@@ -514,7 +515,36 @@ export const SettingsView: React.FC = () => {
         )}
       </div>
 
-      {/* 4. Reset & Privacy */}
+      {/* 4. App Icon & Welcome Intro Animation */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#1E293B] border border-[#E8E5DF] dark:border-gray-800 shadow-xs flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#0f766e] shrink-0 border border-teal-800/20 shadow-xs">
+            <img
+              src="/app-icon.png"
+              alt="EasyPath Icon"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <span className="font-heading font-extrabold text-sm text-gray-900 dark:text-white block">
+              EasyPath Welcome Animation
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 block">
+              Calming 4-step path intro with stepping stones and guiding sun
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => replayIntroAnimation()}
+          className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shrink-0 shadow-xs transition active:scale-95 flex items-center gap-1.5"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Play Animation</span>
+        </button>
+      </div>
+
+      {/* 5. Reset & Privacy */}
       <div className="p-4 rounded-3xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 flex items-center justify-between gap-3">
         <div>
           <span className="font-heading font-extrabold text-sm text-rose-900 dark:text-rose-200 block">

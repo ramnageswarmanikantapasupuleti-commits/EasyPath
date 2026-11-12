@@ -6,6 +6,11 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type, Modality } from '@google/genai';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
+import { requireAuth, optionalAuth, AuthRequest } from './src/middleware/auth.ts';
+import { db } from './src/db/index.ts';
+import { users, tasks, schedules, moodLogs, sharedNotes, voiceShortcuts } from './src/db/schema.ts';
+import { getOrCreateUser, getUserByUid, updateUserRole } from './src/db/users.ts';
+import { eq, and, desc } from 'drizzle-orm';
 
 dotenv.config();
 
@@ -490,6 +495,229 @@ app.post('/api/ai/chat', async (req, res) => {
       isFallback: true,
       rolePersona,
     });
+  }
+});
+
+// =========================================================================
+// AUTH & ROLE-ISOLATED CLOUD SQL (POSTGRESQL) DATA ENDPOINTS
+// =========================================================================
+
+// 1. Sync User / Session with Role Isolation
+app.post('/api/auth/sync-user', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const email = req.user!.email || 'user@easypath.app';
+    const { role = 'user', displayName } = req.body;
+
+    const userRecord = await getOrCreateUser(uid, email, displayName, role);
+    res.json({ status: 'ok', user: userRecord });
+  } catch (error: any) {
+    console.error('Error syncing user:', error);
+    res.status(500).json({ error: 'Failed to sync user session' });
+  }
+});
+
+// 2. Update User Role Profile ('user' vs 'caregiver')
+app.post('/api/auth/update-role', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const { role } = req.body;
+    if (role !== 'user' && role !== 'caregiver') {
+      res.status(400).json({ error: 'Role must be user or caregiver' });
+      return;
+    }
+    const updated = await updateUserRole(uid, role);
+    res.json({ status: 'ok', user: updated });
+  } catch (error: any) {
+    console.error('Error updating role:', error);
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
+});
+
+// 3. Tasks - Isolated by User UID
+app.get('/api/data/tasks', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const records = await db.select().from(tasks).where(eq(tasks.userId, uid)).orderBy(desc(tasks.createdAt));
+    const formatted = records.map((r) => {
+      let parsedSteps = [];
+      try {
+        parsedSteps = JSON.parse(r.steps || '[]');
+      } catch {}
+      return {
+        ...r,
+        steps: parsedSteps,
+      };
+    });
+    res.json(formatted);
+  } catch (error: any) {
+    console.error('Failed to get tasks:', error);
+    res.status(500).json({ error: 'Failed to query tasks' });
+  }
+});
+
+app.post('/api/data/tasks', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const { id, title, category = 'routine', estimatedMinutes = 5, status = 'pending', steps = [], isAiGenerated = false } = req.body;
+    if (!id || !title) {
+      res.status(400).json({ error: 'id and title are required' });
+      return;
+    }
+    const result = await db
+      .insert(tasks)
+      .values({
+        id,
+        userId: uid,
+        title,
+        category,
+        estimatedMinutes,
+        status,
+        steps: JSON.stringify(steps),
+        isAiGenerated,
+      })
+      .onConflictDoUpdate({
+        target: tasks.id,
+        set: {
+          title,
+          category,
+          estimatedMinutes,
+          status,
+          steps: JSON.stringify(steps),
+        },
+      })
+      .returning();
+    res.json({ status: 'ok', task: result[0] });
+  } catch (error: any) {
+    console.error('Failed to save task:', error);
+    res.status(500).json({ error: 'Failed to save task' });
+  }
+});
+
+// 4. Schedules - Isolated by User UID
+app.get('/api/data/schedules', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const records = await db.select().from(schedules).where(eq(schedules.userId, uid)).orderBy(schedules.time);
+    res.json(records);
+  } catch (error: any) {
+    console.error('Failed to get schedules:', error);
+    res.status(500).json({ error: 'Failed to query schedules' });
+  }
+});
+
+app.post('/api/data/schedules', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const { id, title, time, category = 'routine', completed = false, icon = 'Clock' } = req.body;
+    if (!id || !title || !time) {
+      res.status(400).json({ error: 'id, title, and time are required' });
+      return;
+    }
+    const result = await db
+      .insert(schedules)
+      .values({
+        id,
+        userId: uid,
+        title,
+        time,
+        category,
+        completed,
+        icon,
+      })
+      .onConflictDoUpdate({
+        target: schedules.id,
+        set: {
+          title,
+          time,
+          category,
+          completed,
+          icon,
+        },
+      })
+      .returning();
+    res.json({ status: 'ok', schedule: result[0] });
+  } catch (error: any) {
+    console.error('Failed to save schedule:', error);
+    res.status(500).json({ error: 'Failed to save schedule' });
+  }
+});
+
+// 5. Mood Logs - Isolated by User UID
+app.get('/api/data/mood', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const records = await db.select().from(moodLogs).where(eq(moodLogs.userId, uid)).orderBy(desc(moodLogs.createdAt));
+    res.json(records);
+  } catch (error: any) {
+    console.error('Failed to get mood logs:', error);
+    res.status(500).json({ error: 'Failed to query mood logs' });
+  }
+});
+
+app.post('/api/data/mood', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const { id, level, label, note, timestamp = 'Just now', sharedWithHelper = true } = req.body;
+    if (!id || level === undefined || !label) {
+      res.status(400).json({ error: 'id, level, and label are required' });
+      return;
+    }
+    const result = await db
+      .insert(moodLogs)
+      .values({
+        id,
+        userId: uid,
+        level,
+        label,
+        note: note || null,
+        timestamp,
+        sharedWithHelper,
+      })
+      .returning();
+    res.json({ status: 'ok', moodLog: result[0] });
+  } catch (error: any) {
+    console.error('Failed to save mood log:', error);
+    res.status(500).json({ error: 'Failed to save mood log' });
+  }
+});
+
+// 6. Shared Notes - Multi-role communication between User and Caregiver
+app.get('/api/data/notes', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const records = await db.select().from(sharedNotes).where(eq(sharedNotes.userId, uid)).orderBy(desc(sharedNotes.createdAt));
+    res.json(records);
+  } catch (error: any) {
+    console.error('Failed to get shared notes:', error);
+    res.status(500).json({ error: 'Failed to query shared notes' });
+  }
+});
+
+app.post('/api/data/notes', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const uid = req.user!.uid;
+    const { id, author, authorRole = 'caregiver', text, timestamp = 'Just now', isPinned = false } = req.body;
+    if (!id || !text) {
+      res.status(400).json({ error: 'id and text are required' });
+      return;
+    }
+    const result = await db
+      .insert(sharedNotes)
+      .values({
+        id,
+        userId: uid,
+        author: author || 'Caregiver',
+        authorRole,
+        text,
+        timestamp,
+        isPinned,
+      })
+      .returning();
+    res.json({ status: 'ok', note: result[0] });
+  } catch (error: any) {
+    console.error('Failed to save shared note:', error);
+    res.status(500).json({ error: 'Failed to save shared note' });
   }
 });
 

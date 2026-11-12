@@ -118,6 +118,15 @@ interface AppContextType {
   deleteCustomVoiceShortcut: (id: string) => void;
   updateCustomVoiceShortcut: (id: string, partial: Partial<CustomVoiceShortcut>) => void;
 
+  // Auth & Cloud SQL Account Modal
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+
+  // App Intro & Splash Animation
+  showSplash: boolean;
+  setShowSplash: (show: boolean) => void;
+  replayIntroAnimation: () => void;
+
   resetAllData: () => void;
 }
 
@@ -492,6 +501,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Live Voice Conversation Modal (Gemini 3.8 Live)
   const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState<boolean>(false);
+
+  // Cloud SQL & Firebase Auth Modal
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  // App Intro & Splash Animation (shown on initial load)
+  const [showSplash, setShowSplash] = useState<boolean>(() => {
+    // Show splash screen on first visit of this browser session
+    return !sessionStorage.getItem('easypath_seen_intro_v2');
+  });
+
+  const replayIntroAnimation = () => {
+    setShowSplash(true);
+  };
 
   // Custom User-Defined Voice Shortcuts State
   const [customVoiceShortcuts, setCustomVoiceShortcuts] = useState<CustomVoiceShortcut[]>(() => {
@@ -915,6 +937,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCustomVoiceShortcut,
         deleteCustomVoiceShortcut,
         updateCustomVoiceShortcut,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        showSplash,
+        setShowSplash,
+        replayIntroAnimation,
         resetAllData,
       }}
     >

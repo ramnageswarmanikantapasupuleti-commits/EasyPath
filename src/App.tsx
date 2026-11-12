@@ -1,7 +1,10 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import { TopRoleBar } from './components/layout/TopRoleBar';
 import { BottomNav } from './components/layout/BottomNav';
+import { AuthModal } from './components/common/AuthModal';
+import { AppSplashScreen } from './components/common/AppSplashScreen';
 
 // User Mode Views
 import { HomeDashboard } from './components/views/user/HomeDashboard';
@@ -56,6 +59,8 @@ const MainAppContent: React.FC = () => {
     videoGuidePrompt,
     isLiveVoiceOpen,
     setIsLiveVoiceOpen,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
     addTask,
     addSharedNote,
   } = useApp();
@@ -202,14 +207,25 @@ const MainAppContent: React.FC = () => {
         isOpen={isLiveVoiceOpen}
         onClose={() => setIsLiveVoiceOpen(false)}
       />
+
+      {/* Cloud SQL & Firebase User/Caregiver Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* App Intro & Splash Welcome Animation with New App Icon */}
+      <AppSplashScreen />
     </div>
   );
 };
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainAppContent />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <MainAppContent />
+      </AppProvider>
+    </AuthProvider>
   );
 }

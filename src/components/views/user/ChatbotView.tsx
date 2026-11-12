@@ -218,7 +218,7 @@ export const ChatbotView: React.FC = () => {
       playGentleChime('success');
 
       // Auto-read response if speech auto-read is enabled
-      if (settings.autoReadSteps) {
+      if (settings.autoRead) {
         speak(botReply);
       }
     } catch (err: any) {

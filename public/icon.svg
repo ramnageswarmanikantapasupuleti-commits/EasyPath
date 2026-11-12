@@ -1,31 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4A90D9"/>
-      <stop offset="100%" stop-color="#2C5F8A"/>
-    </linearGradient>
-    <linearGradient id="pathGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#68B28A"/>
-      <stop offset="100%" stop-color="#FAF8F5"/>
-    </linearGradient>
-  </defs>
-  <!-- Background Rounded Rect -->
-  <rect width="512" height="512" rx="128" fill="url(#skyGrad)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1170 991" width="100%" height="100%">
+  <!-- Background with soothing teal -->
+  <rect width="1170" height="991" rx="120" fill="#0f766e"/>
   
-  <!-- Guiding Sun / Star in Top-Right -->
-  <circle cx="370" cy="140" r="50" fill="#F5A623"/>
-  <circle cx="370" cy="140" r="64" fill="#F5A623" opacity="0.3"/>
+  <!-- Stepping Stones / Path Dots -->
+  <!-- 1. Bottom-Left Cream Stone -->
+  <circle cx="326" cy="842" r="130" fill="#fff7e0"/>
   
-  <!-- Peaceful Guiding Path -->
-  <path d="M 120 460 C 160 380, 210 320, 256 280 C 310 230, 360 210, 370 140" 
-        stroke="url(#pathGrad)" stroke-width="54" stroke-linecap="round" fill="none"/>
+  <!-- 2. Mid-Right Cream Stone -->
+  <circle cx="738" cy="630" r="154" fill="#fff7e0"/>
   
-  <!-- Stepping Stones / Checkpoints -->
-  <circle cx="170" cy="380" r="16" fill="#FFFFFF"/>
-  <circle cx="240" cy="300" r="18" fill="#FFFFFF"/>
-  <circle cx="310" cy="230" r="20" fill="#FFFFFF"/>
-
-  <!-- Friendly Heart / Smile Indicator -->
-  <path d="M 150 180 C 135 150, 95 155, 95 190 C 95 230, 150 265, 150 265 C 150 265, 205 230, 205 190 C 205 155, 165 150, 150 180 Z" 
-        fill="#FFFFFF" opacity="0.95"/>
+  <!-- 3. Mid-Left Cream Stone -->
+  <circle cx="462" cy="366" r="118" fill="#fff7e0"/>
+  
+  <!-- 4. Top-Right Guiding Orange Sun -->
+  <circle cx="838" cy="160" r="130" fill="#fb923c"/>
 </svg>
